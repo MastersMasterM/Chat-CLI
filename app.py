@@ -1,9 +1,11 @@
 from member import member
 import redis
 import json
+import datetime
 
 rg = redis.Redis(db=1)
 rm = redis.Redis(db=2)
+rmes = redis.Redis(db=3)
 
 def main_menu():
     pass
@@ -102,8 +104,20 @@ def left_group(member:member):
     member.leave_group(g_name)
     main_menu(member)
 
+def search_history(member:member):
+    allgp = rg.keys('*')
+    allgp = [x.decode() for x in allgp]
+    print("Available groups are as follows:")
+    for x in allgp: print(x)
+    g_name = input(f"Please enter the group name:")
+    s_name = input(f"Please enter the name of the sender name:")
+    datet = input(f"Please enter the date with this format {datetime.datetime.now().replace(microsecond=0).isoformat(sep='-')}:")
+    print(rmes.get(f"{g_name}-{s_name}-{datet}"))
+    main_menu(member)
+
+
 def main_menu(member:member):
-    print("What would you like to do?\n 1)View Joined Groups\n 2)Send Message\n 3)Join new a group\n 4)Create a group\n 5)Left from one of your group\n 6)Exit")
+    print("What would you like to do?\n 1)View Joined Groups Messages\n 2)Send Message\n 3)Join new a group\n 4)Create a group\n 5)Left from one of your group\n 6)Search in All Messages History\n 7)Exit")
     op = int(input("Please enter a number:"))
     if op == 1:
         view_group(member)
@@ -116,6 +130,8 @@ def main_menu(member:member):
     elif op == 5:
         left_group(member)
     elif op == 6:
+        search_history(member)
+    elif op == 7:
         quit()
     else:
         print("\nYou've entered wrong input.")
